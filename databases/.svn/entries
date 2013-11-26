@@ -1,0 +1,231 @@
+10
+
+dir
+0
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1/Source/web2py/applications/swaraa/databases
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+971612ee-3396-4e2b-b597-8829551d6408
+
+c8b669d15150d7109e5f7ab36744a5b7_song.table
+file
+
+
+
+add
+
+storage.sqlite
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+c8b669d15150d7109e5f7ab36744a5b7_dislikes.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_likes.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_recommend.table
+file
+
+
+
+add
+
+sql.log.mine
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_auth_permission.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_ragaa.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_auth_membership.table
+file
+
+
+
+add
+
+storage.sqlite.r50
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+c8b669d15150d7109e5f7ab36744a5b7_category.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_auth_group.table
+file
+
+
+
+add
+
+storage.sqlite.r51
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+sql.log
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_comments.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_auth_cas.table
+file
+
+
+
+add
+
+sql.log.r50
+file
+
+
+
+add
+
+sql.log.r51
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_instruments.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_report_comment.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_rated.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_auth_user.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_profile.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_report_song.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_playlist.table
+file
+
+
+
+add
+
+c8b669d15150d7109e5f7ab36744a5b7_auth_event.table
+file
+
+
+
+add
+

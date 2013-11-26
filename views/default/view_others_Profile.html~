@@ -1,0 +1,47 @@
+{{extend 'layout.html'}}
+{{if(len(x)):}}
+<div style="float:left; width:50%">
+	{{=TAG.img(_width=250, _src=URL(r=request, c='default', f='download', args=[x[0]['profile_pic']]))}}
+	</div>
+<div style="float:center; width=30%;background-color:grey">
+	<p style='text-align:justified;font-family:Monotype Corsiva;font-size:15px'>
+		Name : {{=y[0]['first_name']}} <br />
+		You Are : {{=x[0]['user_type']}} <br />
+		About Yourself : {{=x[0]['about']}} <br />
+		Reputation : {{=x[0]['reputation']}}<br />
+		</p>
+	</div>
+	<div style='float:left;width:65%'>
+		<h4 style='background-color:black;text-align:center'> Songs You Posted </h4>
+		<table border="1">
+		<tr style="background-color:black">
+		<th>Song</th>
+		<th>Composer</th>
+		<th>Views</th>
+		<th>Likes</th>
+		<th>Dislikes</th>
+		<th>Posted On</th>
+		</tr>
+			{{for i in range(len(b)):}}
+			<tr style="background-color:grey">
+			<td><a href="songpage?id1={{=b[i]['id']}}">{{=b[i]['Title']}}</a></td>
+			<td>{{=b[i]['Composer']}}</td>
+			<td>{{=b[i]['Num_views']}}</td>
+			<td>{{=b[i]['Num_likes']}}</td> 
+			<td>{{=b[i]['Num_dislikes']}} </td>
+			<td>{{=b[i]['post_time']}} </td></tr>
+		{{pass}}
+		</table>
+	</div>
+	<div style='float:right;width:30%;background-color:grey'>
+		<h4 style='background-color:black;text-align:center'> Songs on your Playlist </h4>
+		<ol>
+		{{for i in a:}}
+		<li> <a href="songpage?id1={{=i['song.id']}}">{{=i['song.Title']}} </a></li><br />
+			
+		{{pass}}
+		</ol>
+	</div>
+{{else:}}
+	<h3> No such User exists! </h3>
+{{pass}}

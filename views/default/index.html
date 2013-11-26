@@ -1,0 +1,49 @@
+{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
+{{extend 'layout.html'}}
+
+<h5>
+Music gives meaning to life ..
+Brings out the joy in sorrow</br>
+Brings out the pain in happiness..
+Shows that the world is not so bland</br>
+But shows that it is like sand..
+The variety of it ..</br>
+..  </br>
+.. ..</br>
+.. .. .. ..</br>
+And the more you try to hold it in your hand </br>
+The more it slips back into the rest of the sand.</br>
+</br>
+Everyone is a VADI or a SAMAVADI in their own special way</br>
+Life has it's own way to present us AROHAS and AVAROHAS</br>
+It has it's own way of changing the RAAGA and TAALA </br>
+But if you understand it's SHRUTI</br>
+You shall emerge as PANDITS or USTADS, eventually.</br>
+</br>
+"WITHOUT MUSIC, LIFE WOULD BE A MISTAKE!!"
+</h5>
+
+{{block right_sidebar}}
+<div style="width:320px ;background-color:; text-align:center">
+{{if not auth.user_id:}}
+	<div style="background-color:">
+	<center><h3>Login</h3></center>
+    </div>
+	 <a href="/swaraa/default/user/login?_next=/swaraa/default/homepage"><button type="button">Login</button> </a> 
+	<br/>
+	<br/>
+	<h5>Not a member yet? Join Here!</h5>
+	{{=A(T("Register"), _href=URL('swaraa','default','user/register'), _class='btn',
+	     _style='margin-top: 1em;')}}
+{{pass}}
+</br><br /> <br />
+</div>
+<div id="searchbox" style='width:320px; background-color:'>
+<h5>Looking for Something? :</h5>
+<form method='get' action="{{=URL('swaraa','default','search')}}">
+<input type='text' name='keyword'></br>
+<input type='submit' value='Search'>
+</form>
+</div>
+{{pass}}
+{{end}}

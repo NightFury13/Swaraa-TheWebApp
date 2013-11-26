@@ -1,0 +1,224 @@
+10
+
+dir
+0
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1/Source/web2py/applications/swaraa/languages
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+971612ee-3396-4e2b-b597-8829551d6408
+
+id.py
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+plural-en.py
+file
+
+
+
+add
+
+hi.py
+file
+
+
+
+add
+
+plural-cs.py
+file
+
+
+
+add
+
+cs.py
+file
+
+
+
+add
+
+es.py
+file
+
+
+
+add
+
+fr.py
+file
+
+
+
+add
+
+nl.py
+file
+
+
+
+add
+
+zh-tw.py
+file
+
+
+
+add
+
+pl.py
+file
+
+
+
+add
+
+it.py
+file
+
+
+
+add
+
+hu.py
+file
+
+
+
+add
+
+plural-uk.py
+file
+
+
+
+add
+
+sk.py
+file
+
+
+
+add
+
+zh-cn.py
+file
+
+
+
+add
+
+uk.py
+file
+
+
+
+add
+
+ro.py
+file
+
+
+
+add
+
+zh.py
+file
+
+
+
+add
+
+pt.py
+file
+
+
+
+add
+
+plural-ru.py
+file
+
+
+
+add
+
+default.py
+file
+
+
+
+add
+
+pt-br.py
+file
+
+
+
+add
+
+my.py
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+tr.py
+file
+
+
+
+add
+
+ru.py
+file
+
+
+
+add
+
+fr-ca.py
+file
+
+
+
+add
+

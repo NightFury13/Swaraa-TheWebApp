@@ -1,0 +1,109 @@
+{{extend 'layout.html'}}
+{{if(len(x)):}}
+<div style="float:left; width:50%">
+	{{=TAG.img(_width=250, _src=URL(r=request, c='default', f='download', args=[x[0]['profile_pic']]))}}
+	</div>
+<div style="float:center; width=30%;background-color:">
+	<p style='text-align:justified;font-family:Monotype Corsiva;font-size:15px'>
+		Name : {{=y[0]['first_name']}} <br />
+		You Are : {{=x[0]['user_type']}} <br />
+		About Yourself : {{=x[0]['about']}} <br />
+		Reputation : {{=r[0]['reputation']}}<br />
+		</p>
+	</div>
+	<div style='float:left;width:65%'>
+		<h4 style='background-color:black;text-align:center'> Songs You Posted </h4>
+		<table border="1">
+		<tr style="background-color:black">
+		<th>Song</th>
+		<th>Composer</th>
+		<th>Views</th>
+		<th>Likes</th>
+		<th>Dislikes</th>
+		<th>Posted On</th>
+		</tr>
+			{{for i in range(len(b)):}}
+			<tr style="background-color:">
+			<td><a href="songpage?id1={{=b[i]['id']}}">{{=b[i]['Title']}}</a></td>
+			<td>{{=b[i]['Composer']}}</td>
+			<td>{{=b[i]['Num_views']}}</td>
+			<td>{{=b[i]['Num_likes']}}</td> 
+			<td>{{=b[i]['Num_dislikes']}} </td>
+			<td>{{=b[i]['post_time']}} </td></tr>
+		{{pass}}
+		</table>
+	</div>
+	<div style='float:left;width:65%'>
+		<h4 style='background-color:black;text-align:center'> Songs You Liked </h4>
+		<table border="1">
+		<tr style="background-color:black">
+		<th>Song</th>
+		<th>Composer</th>
+		<th>Views</th>
+		<th>Likes</th>
+		<th>Dislikes</th>
+		<th>Posted On</th>
+		</tr>
+			{{for i in range(len(liked)):}}
+			<tr style="background-color:">
+			<td><a href="songpage?id1={{=liked[i]['likes.song_id']}}">{{=liked[i]['song.Title']}}</a></td>
+			<td>{{=liked[i]['song.Composer']}}</td>
+			<td>{{=liked[i]['song.Num_views']}}</td>
+			<td>{{=liked[i]['song.Num_likes']}}</td> 
+			<td>{{=liked[i]['song.Num_dislikes']}} </td>
+			<td>{{=liked[i]['song.post_time']}} </td></tr>
+		{{pass}}
+	    </table>
+	</div>
+	<div style='float:left;width:65%'>
+		<h4 style='background-color:black;text-align:center'> Songs You Disliked </h4>
+		<table border="1">
+		<tr style="background-color:black">
+		<th>Song</th>
+		<th>Composer</th>
+		<th>Views</th>
+		<th>Likes</th>
+		<th>Dislikes</th>
+		<th>Posted On</th>
+		</tr>
+			{{for i in range(len(disliked)):}}
+			<tr style="background-color:">
+			<td><a href="songpage?id1={{=disliked[i]['dislikes.song_id']}}">{{=disliked[i]['song.Title']}}</a></td>
+			<td>{{=disliked[i]['song.Composer']}}</td>
+			<td>{{=disliked[i]['song.Num_views']}}</td>
+			<td>{{=disliked[i]['song.Num_likes']}}</td> 
+			<td>{{=disliked[i]['song.Num_dislikes']}} </td>
+			<td>{{=disliked[i]['song.post_time']}} </td></tr>
+		{{pass}}
+	    </table>
+	</div>
+	<div style='float:left;width:65%'>
+		<h4 style='background-color:black;text-align:center'> Songs Recommended To You </h4>
+		<table border="1">
+		<tr style="background-color:black">
+		<th>Song</th>
+		<th>Composer</th>
+		<th>Views</th>
+		<th>Likes</th>
+		<th>Dislikes</th>
+		<th>Posted On</th>
+		<th>Recommended By</th>
+		</tr>
+			{{for i in range(len(recommended)):}}
+			<tr style="background-color:">
+			<td><a href="songpage?id1={{=recommended[i]['recommend.song_id']}}">{{=recommended[i]['song.Title']}}</a></td>
+			<td>{{=recommended[i]['song.Composer']}}</td>
+			<td>{{=recommended[i]['song.Num_views']}}</td>
+			<td>{{=recommended[i]['song.Num_likes']}}</td> 
+			<td>{{=recommended[i]['song.Num_dislikes']}} </td>
+			<td>{{=recommended[i]['song.post_time']}} </td>
+			<td>
+			    <a href="view_others_Profile?id1={{=recommended[i]['recommend.recommended_by']}}">{{=recommended[i]['auth_user.username']}}</a>
+			</td>
+			    </tr>
+		{{pass}}
+	    </table>
+	</div>
+{{else:}}
+	<h3> No such User exists! </h3>
+{{pass}}

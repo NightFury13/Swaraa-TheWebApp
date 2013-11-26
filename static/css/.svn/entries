@@ -1,0 +1,77 @@
+10
+
+dir
+0
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1/Source/web2py/applications/swaraa/static/css
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+971612ee-3396-4e2b-b597-8829551d6408
+
+calendar.css
+file
+
+
+
+add
+
+bootstrap-responsive.min.css
+file
+
+
+
+add
+
+web2py_bootstrap_nojs.css
+file
+
+
+
+add
+
+bootstrap.min.css
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+web2py_bootstrap.css
+file
+
+
+
+add
+
+web2py.css
+file
+
+
+
+add
+

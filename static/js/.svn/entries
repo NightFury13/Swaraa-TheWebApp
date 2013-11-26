@@ -1,0 +1,98 @@
+10
+
+dir
+0
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1/Source/web2py/applications/swaraa/static/js
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+971612ee-3396-4e2b-b597-8829551d6408
+
+web2py_bootstrap.js
+file
+
+
+
+add
+
+web2py.js
+file
+
+
+
+add
+
+calendar.js
+file
+
+
+
+add
+
+analytics.min.js
+file
+
+
+
+add
+
+dd_belatedpng.js
+file
+
+
+
+add
+
+bootstrap.min.js
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+jquery.js
+file
+
+
+
+add
+
+modernizr.custom.js
+file
+
+
+
+add
+
+share.js
+file
+
+
+
+add
+

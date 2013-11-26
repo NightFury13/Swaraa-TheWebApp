@@ -1,0 +1,41 @@
+{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
+<img src="https://sphotos-a-ord.xx.fbcdn.net/hphotos-ash4/734967_218813838262323_880374337_n.jpg"></img>
+{{extend 'layout3.html'}}
+{{block right_sidebar}}
+<div style="width:320px ;background-color:orange; text-align:center">
+{{if not auth.user_id:}}
+	<div style="background-color:grey">
+	<center><h3>Login</h3></center>
+    </div>
+	 <a href="/swaraa/default/user/login?_next=/swaraa/default/homepage"><button type="button">Login</button> </a> 
+	<br/>
+	<br/>
+	<h5>Not a member yet? Join Here!</h5>
+	{{=A(T("Register"), _href=URL('swaraa','default','user/register'), _class='btn',
+	     _style='margin-top: 1em;')}}
+{{pass}}
+{{if auth.user_id:}}	
+	<div style="background-color:grey">
+	<center><h3>Welcome!</h3></center>
+	</div>	
+	{{=A(T("View Profile"), _href=URL('swaraa','default','viewProfile'), _class='btn', _style='margin-top: 1em;')}}
+	<div style="width:320px; background-color:grey">
+	<center><h3>Upload whats' New!</h3></center>
+	</div>
+	<div style="width:320px; background-color:lightgrey">
+	<center>
+	{{=A(T("Upload"), _href=URL('swaraa','appadmin','insert/db/song'), _class='btn', _style='margin-top: 1em;')}}
+</center>
+</div>
+{{pass}}
+</br>
+</div>
+<div id="searchbox" style='width:320px; background-color:lightgrey'>
+<h5>Looking for Something? :</h5>
+<form method='get' action="{{=URL('swaraa','default','search')}}">
+<input type='text' name='keyword'></br>
+<input type='submit' value='Search'>
+</form>
+</div>
+{{pass}}
+{{end}}

@@ -1,0 +1,16 @@
+{{extend 'layout.html'}}
+<a href="songpage?id1={{=x}}"><input type="button" value="Back to song" /></a>
+<br />
+<br />
+RECOMMEND TO 
+<ul>
+    {{for i in users:}}
+    <li><a href='view_others_Profile?id1={{=i['id']}}'>{{=i['username']}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    {{if i['id'] in l:}}
+    Already recommended. Do you want to <a href='remove_recommend?id1={{=x}}&id2={{=i['id']}}'><input type="button" value="Remove Recommend"></a>
+    {{else:}}
+    <a href='recommend_to?id1={{=x}}&id2={{=i['id']}}'><input type="button" value="Recommend"></a>
+    {{pass}}
+    </li><br />
+    {{pass}}
+</ul>

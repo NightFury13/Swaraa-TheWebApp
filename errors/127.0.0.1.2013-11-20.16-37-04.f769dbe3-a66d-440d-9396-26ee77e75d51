@@ -1,0 +1,383 @@
+(dp1
+S'output'
+p2
+S"<type 'exceptions.AttributeError'> 'NoneType' object has no attribute 'first_name'"
+p3
+sS'layer'
+p4
+S'/home/himangi/INTRO TO DB/web2py/applications/swaraa/controllers/default.py'
+p5
+sS'code'
+p6
+S'# -*- coding: utf-8 -*-\n# this file is released under public domain and you can use without limitations\n\n#########################################################################\n## This is a sample controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################\n\n\ndef index():\n    """\n    example action using the internationalization operator T and flash\n    rendered by views/default/index.html or views/generic.html\n\n    if you need a simple wiki simple replace the two lines below with:\n    return auth.wiki()\n    """\n    if auth.user_id>0:\n        redirect(URL(r=request,f=\'homepage\'))\n    response.flash = T("Welcome to web2py!")\n    return dict(message=T(\'Hello World\'))\n\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login\n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    http://..../[app]/default/user/manage_users (requires membership in\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n@auth.requires_login()\ndef recommend():\n        x=int(request.vars.id1)\n\tl=[]\n\trecommends_made=db((db.recommend.song_id==x)&(db.recommend.recommended_by==auth.user_id)).select(db.recommend.ALL)\n\tusers=db(db.auth_user.id>0).select(db.auth_user.ALL)\n\tfor i in recommends_made:\n\t    l.append(i[\'recommended_to\'])\n\treturn locals()\ndef search():\n\tx=request.vars[\'keyword\']\n\tresult=db(db.song.Title.contains(x) | db.song.raaga.contains(x) | db.song.Composer.contains(x)).select(orderby=~(db.song.Rating))\n\treturn locals()\n@auth.requires_login()\ndef recommend_to():\n    x=int(request.vars.id1)\n    y=int(request.vars.id2)\n    db.recommend.insert(song_id=x,recommended_by=auth.user_id,recommended_to=y)\n    response.flash="Succesfully recommended"\n    redirect(URL(\'recommend?id1=%d\'%(x)))\n    return locals()\n@auth.requires_login()\ndef remove_recommend():\n    x=int(request.vars.id1)\n    y=int(request.vars.id2)\n    myset=db((db.recommend.song_id==x)&(db.recommend.recommended_to==y)&(db.recommend.recommended_by==auth.user_id))\n    myset.delete()\n    response.flash="Succesfully recommend removed"\n    redirect(URL(\'recommend?id1=%d\'%(x)))\n\n@auth.requires_login()\ndef view_reported():\n    comm=db().select(db.report_comment.ALL)\n    son=db((db.report_song.song_id==db.song.id)&(db.report_song.user_id==db.auth_user.id)).select(db.song.ALL,db.report_song.ALL,db.auth_user.id,db.auth_user.username)\n    return locals()\ndef view_others_Profile():\n    c=int(request.vars.id1)\n    r=db(db.auth_user.id==auth.user.id).select(db.auth_user.id,db.auth_user.reputation)\n    x = db(db.auth_user.id ==c ).select()\n    y = db(x[0][\'id\'] == db.auth_user.id).select(db.auth_user.first_name)\n    a = db((x[0][\'id\'] == db.playlist.user_id)&(db.playlist.song_id==db.song.id)).select(db.playlist.song_id,db.song.ALL)\n    liked = db((x[0][\'id\'] == db.likes.user_id)&(db.likes.song_id==db.song.id)).select(db.likes.song_id,db.song.ALL)\n    disliked = db((x[0][\'id\'] == db.dislikes.user_id)&(db.dislikes.song_id==db.song.id)).select(db.dislikes.song_id,db.song.ALL)\n    recommended = db((x[0][\'id\'] == db.recommend.recommended_to)&(db.recommend.song_id==db.song.id)&(db.recommend.recommended_by==db.auth_user.id)).select(db.recommend.ALL,db.song.ALL,db.auth_user.ALL)\n    b = db(db.song.user_id == x[0][\'id\']).select()\n    return locals()\ndef add_to_playlist():\n    x=int(request.vars.id1)\n    db.playlist.insert(song_id=x,user_id=auth.user_id)\n    redirect(URL(\'songpage?id1=%d\'%(x)))\ndef remove_from_playlist():\n        x=int(request.vars.id1)\n\tdb(db.playlist.song_id==x,db.playlist.user_id==auth.user_id).delete()\n\tredirect(URL(\'songpage?id1=%d\'%(x)))\n\treturn locals()\ndef report_song():\n    x=int(request.vars.id1)\n    db.report_song.insert(song_id=x,user_id=auth.user_id)\n    db(db.song.id==x).update(reported=1)\n    n=db(db.song.id==x).select(db.song.user_id)\n    reputations=db(db.auth_user.id==n[0][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n    init_rep=reputations[0][\'reputation\']\n    db(db.auth_user.id==n[0][\'user_id\']).update(reputation=init_rep-40)\n    redirect(URL(\'songpage?id1=%d\'%(x)))\n    return locals()\ndef report_song_undo():\n    x=int(request.vars.id1)\n    db(db.report_song.song_id==x,db.report_song.user_id==auth.user_id).delete()\n    db(db.song.id==x).update(reported=0)\n    n=db(db.song.id==x).select(db.song.user_id)\n    reputations=db(db.auth_user.id==n[0][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n    init_rep=reputations[0][\'reputation\']\n    db(db.auth_user.id==n[0][\'user_id\']).update(reputation=init_rep+40)\n    redirect(URL(\'songpage?id1=%d\'%(x)))\n    return locals()\ndef report_song_undo1():\n    x=int(request.vars.id1)\n    db(db.report_song.song_id==x,db.report_song.user_id==auth.user_id).delete()\n    db(db.song.id==x).update(reported=0)\n    n=db(db.song.id==x).select(db.song.user_id)\n    reputations=db(db.auth_user.id==n[0][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n    init_rep=reputations[0][\'reputation\']\n    db(db.auth_user.id==n[0][\'user_id\']).update(reputation=init_rep+40)\n    redirect(URL(\'view_reported\'))\n    return locals()\ndef report_comment():\n    y=int(request.vars.id1)\n    x=int(request.vars.id2)\n    db.report_comment.insert(comment_id=x,user_id=auth.user_id)\n    db(db.comments.id==x).update(reported=1)\n    n=db(db.comments.id==x).select(db.comments.user_id)\n    reputations=db(db.auth_user.id==n[0][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n    init_rep=reputations[0][\'reputation\']\n    db(db.auth_user.id==n[0][\'user_id\']).update(reputation=init_rep-20)\n    redirect(URL(\'songpage?id1=%d\'%(y)))\n    return locals()\ndef report_comment_undo():\n    y=int(request.vars.id1)\n    x=int(request.vars.id2)\n    db(db.report_comment.comment_id==x,db.report_comment.user_id==auth.user_id).delete()\n    db(db.comments.id==x).update(reported=0)\n    n=db(db.comments.id==x).select(db.comments.user_id)\n    reputations=db(db.auth_user.id==n[0][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n    init_rep=reputations[0][\'reputation\']\n    db(db.auth_user.id==n[0][\'user_id\']).update(reputation=init_rep+20)\n    redirect(URL(\'songpage?id1=%d\'%(y)))\n    return locals()\n\n@auth.requires_login()\ndef songpage():\n    x1=request.vars.id1\n    get = db(db.song.id == x1).select(db.song.ALL)\n    db(db.song.id == x1).update(Num_views = get[0][\'Num_views\'] + 1)\n    get1 = db((db.song.id == x1) & (db.song.user_id == auth.user.id)).select()\n    stat1 = 0\n    status = 0\n    if(len(get1) != 0):\n        stat1 = 1\n    if(auth.user.Account_type == \'Admin\'):\n        status = 1\n    elif(auth.user.Account_type == \'Superuser\'):\n        status = 2\n    else:\n        status = 3\n    yy=request.vars.id1\n    if yy is None:\n\t\tprint "YY IS NONE"\n    song=db(db.song.id==int(yy)).select(db.song.ALL)\n    #song=db(db.song.Title.contains(x)).select()\n    if song:\n        pass\n    else:\n        song=None\n        #print \'no\n        return locals()\n    x=song[0][\'id\']\n    likesongid=request.post_vars.songid\n    dislikesongid=request.post_vars.dsongid\n    rate1=request.post_vars.r1\n    rate2=request.post_vars.r2\n    rate3=request.post_vars.r3\n    rate4=request.post_vars.r4\n    rate5=request.post_vars.r5\n    likes=song[0][\'Num_likes\']\n    dislikes=song[0][\'Num_dislikes\']\n    if likesongid is not None and int(likesongid)==song[0][\'id\']:\n            flag=0\n            lk=db(db.likes.song_id==song[0][\'id\']).select(db.likes.ALL)\n            dlk=db(db.dislikes.song_id==song[0][\'id\']).select(db.dislikes.ALL)\n            for j in range(len(lk)):\n                if lk[j][\'song_id\']==song[0][\'id\'] and lk[j][\'user_id\']==auth.user_id:\n                    flag=1\n                    likes-=1\n                    db(db.likes.id==lk[j][\'id\']).delete()\n                    db(db.song.id==song[0][\'id\']).update(song_rank=100+(2*likes)-dislikes)\n                    x=db(db.song.id==song[0][\'id\']).select(db.song.song_rank)\n                    db(db.song.id==song[0][\'id\']).update(Num_likes=likes,Num_dislikes=dislikes)\n            for j in range(len(dlk)):\n                if dlk[j][\'song_id\']==song[0][\'id\'] and dlk[j][\'user_id\']==auth.user_id:\n                    flag=1\n                    dislikes-=1\n                    likes+=1\n                    db.likes.insert(song_id=song[0][\'id\'],user_id=auth.user_id)\n                    db(db.dislikes.id==dlk[j][\'id\']).delete()\n                    db(db.song.id==song[0][\'id\']).update(song_rank=100+(2*likes)-dislikes)\n                    db(db.song.id==song[0][\'id\']).update(Num_likes=likes,Num_dislikes=dislikes)\n            if flag==0:\n                db.likes.insert(song_id=song[0][\'id\'],user_id=auth.user_id)\n                likes+=1\n                db(db.song.id==song[0][\'id\']).update(song_rank=100+(2*likes)-dislikes)\n                db(db.song.id==song[0][\'id\']).update(Num_likes=likes,Num_dislikes=dislikes)\n    if dislikesongid is not None:\n            if int(dislikesongid)==song[0][\'id\']:\n                flag=0\n                lk=db(db.likes.song_id==song[0][\'id\']).select(db.likes.ALL)\n                dlk=db(db.dislikes.song_id==song[0][\'id\']).select(db.dislikes.ALL)\n                flag=0\n                for j in range(len(dlk)):\n                    if dlk[j][\'song_id\']==song[0][\'id\'] and dlk[j][\'user_id\']==auth.user_id:\n                        flag=1\n                        dislikes-=1\n                        db(db.dislikes.id==dlk[j][\'id\']).delete()\n                        db(db.song.id==song[0][\'id\']).update(song_rank=100+(2*likes)-dislikes)\n                        db(db.song.id==song[0][\'id\']).update(Num_likes=likes,Num_dislikes=dislikes)\n                for j in range(len(lk)):\n                    if lk[j][\'song_id\']==song[0][\'id\'] and lk[j][\'user_id\']==auth.user_id:\n                        flag=1\n                        dislikes+=1\n                        likes-=1\n                        db(db.likes.id==lk[j][\'id\']).delete()\n                        db.dislikes.insert(user_id=auth.user_id,song_id=song[0][\'id\'])\n                        db(db.song.id==song[0][\'id\']).update(song_rank=100+(2*likes)-dislikes)\n                        db(db.song.id==song[0][\'id\']).update(Num_likes=likes,Num_dislikes=dislikes)\n                     #redirect(URL(r=request,f=\'songpage\'))\n                if flag==0:\n                    dislikes+=1\n                    db.dislikes.insert(user_id=auth.user_id,song_id=song[0][\'id\'])\n                    db(db.song.id==song[0][\'id\']).update(song_rank=100+(2*likes)-dislikes)\n                    db(db.song.id==song[0][\'id\']).update(Num_likes=likes,Num_dislikes=dislikes)\n                 #redirect(URL(r=request,f=\'songpage\'))\n    lk=db().select(db.likes.ALL)\n    dlk=db().select(db.dislikes.ALL)\n    likeform=0\n    dislikeform=0\n    for k in range(len(lk)):\n        if lk[k][\'user_id\']==auth.user_id and lk[k][\'song_id\']==song[0][\'id\']:\n            likeform=1\n        else:\n            likeform=0\n    for k in range(len(dlk)):\n        if dlk[k][\'user_id\']==auth.user_id and dlk[k][\'song_id\']==song[0][\'id\']:\n            dislikeform=1\n        else:\n            dislikeform=0\n    if rate1 is not None and int(rate1)==song[0][\'id\']:\n        rate=db().select(db.rated.ALL)\n        flag=0\n        for j in range(len(rate)):\n            if rate[j][\'song_id\']==song[0][\'id\'] and rate[j][\'user_id\']==auth.user_id:\n                flag=1\n      \t        db(db.rated.id==rate[j][\'id\']).update(Rating=1)\n        if flag==0:\n            db.rated.insert(song_id=song[0][\'id\'],user_id=auth.user_id,Rating=1)\n        #redirect(URL(r=request,f=\'homepage\'))\n    if rate2 is not None and int(rate2)==song[0][\'id\']:\n        rate=db().select(db.rated.ALL)\n        flag=0\n        for j in range(len(rate)):\n            if rate[j][\'song_id\']==song[0][\'id\'] and rate[j][\'user_id\']==auth.user_id:\n                flag=1\n                db(db.rated.id==rate[j][\'id\']).update(Rating=2)\n        if flag==0:\n            db.rated.insert(song_id=song[0][\'id\'],user_id=auth.user_id,Rating=2)\n        #    redirect(URL(r=request,f=\'homepage\'))\n    if rate3 is not None and int(rate3)==song[0][\'id\']:\n        rate=db().select(db.rated.ALL)\n        flag=0\n        for j in range(len(rate)):\n            #flag=1\n            if rate[j][\'song_id\']==song[0][\'id\'] and rate[j][\'user_id\']==auth.user_id:\n                flag=1\n                db(db.rated.id==rate[j][\'id\']).update(Rating=3)\n        if flag==0:\n            db.rated.insert(song_id=song[0][\'id\'],user_id=auth.user_id,Rating=3)\n    #        redirect(URL(r=request,f=\'homepage\'))\n    if rate4 is not None and int(rate4)==song[0][\'id\']:\n        rate=db().select(db.rated.ALL)\n        flag=0\n        for j in range(len(rate)):\n            #flag=1\n            if rate[j][\'song_id\']==song[0][\'id\'] and rate[j][\'user_id\']==auth.user_id:\n                flag=1\n                db(db.rated.id==rate[j][\'id\']).update(Rating=4)\n        if flag==0:\n            db.rated.insert(song_id=song[0][\'id\'],user_id=auth.user_id,Rating=4)\n    #        redirect(URL(r=request,f=\'homepage\'))\n    if rate5 is not None and int(rate5)==song[0][\'id\']:\n        rate=db().select(db.rated.ALL)\n        flag=0\n        for j in range(len(rate)):\n            #flag=1\n            if rate[j][\'song_id\']==song[0][\'id\'] and rate[j][\'user_id\']==auth.user_id:\n                flag=1\n                db(db.rated.id==rate[j][\'id\']).update(Rating=5)\n        if flag==0:\n            db.rated.insert(song_id=song[0][\'id\'],user_id=auth.user_id,Rating=5)\n#            redirect(URL(r=request,f=\'homepage\'))\n    #print likeform\n    #print dislikeform\n    check=db((db.rated.user_id==auth.user_id) & (db.rated.song_id==song[0][\'id\'])).select(db.rated.ALL)\n    #ctr=rate()\n    rate=db(db.rated.song_id==song[0][\'id\']).select(db.rated.user_id,db.rated.song_id,db.rated.Rating)\n    ctr=0\n    users=[]\n    for i in rate:\n        if i[\'user_id\'] not in users:\n            users.append(i[\'user_id\'])\n            last=db(db.rated.user_id==i[\'user_id\']).select(db.rated.Rating)\n            l=len(last)\n            rt=last[l-1][\'Rating\']\n            ctr+=rt\n        else:\n            continue\n    ctr=ctr*1.0\n    if len(users)==0:\n        ctr=0\n    else:\n        ctr=(ctr/len(users))\n    db(db.song.id==song[0][\'id\']).update(Rating=ctr)\n    comments=db(db.comments.song_id==song[0][\'id\']).select(db.comments.ALL)\n    userpic=[]\n    for i in comments:\n        x=db(db.auth_user.id==i[\'user_id\']).select(db.auth_user.profile_pic)\n        userpic.append(x[0][\'profile_pic\'])\n\tCOMMENT_USERS=[]\n    stat=[]\n    for i in comments:\n        uname=db(db.auth_user.id==i[\'user_id\']).select(db.auth_user.username)\n        COMMENT_USERS.append(uname[0])\n        if(i[\'user_id\'] == auth.user.id):\n            stat.append(1)\n        else:\n            stat.append(0)\n    commform=SQLFORM.factory(db.Field("cmt","text",label="Add comment:",required=True),\n                                        submit_button="Comment")\n    if commform.process(formname="commform").accepted:\n        db.comments.insert(song_id=song[0][\'id\'],user_id=auth.user_id,comment_text=commform.vars.cmt,comment_time=request.now)\n        redirect(URL(r=request,f=\'songpage?id1=%d\'%int(yy)))\n    flag=0\n    rate1var=0\n    rate2var=0\n    rate3var=0\n    rate4var=0\n    rate5var=0\n    flag=0\n    for i in rate:\n        if i[\'song_id\']==song[0][\'id\'] and i[\'user_id\']==auth.user_id:\n            flag=1\n            if i[\'Rating\']>=1:\n                rate1var=1\n            if i[\'Rating\']>=2:\n                rate2var=1\n            if i[\'Rating\']>=3:\n                rate3var=1\n            if i[\'Rating\']>=4:\n                rate4var=1\n            if i[\'Rating\']==5:\n                rate5var=1\n    #rateform=crud.create(db.rated)\n    song=db(db.song.id==song[0][\'id\']).select(db.song.ALL)\n    in_playlist=len(db((db.playlist.user_id==auth.user_id)&(db.playlist.song_id==yy)).select())\n    already_reported=len(db((db.report_song.user_id==auth.user_id)&(db.report_song.song_id==yy)).select())\n#    redirect(URL(\'songpage?id1=%d\'%(yy)))\n    return locals()\n\n@auth.requires_login()\ndef rate():\n\trate=db(db.rated.song_id==int(request.args(1))).select(db.rated.user_id,db.rated.song_id,db.rated.Rating)\n\tctr=0\n\tusers=[]\n\tfor i in rate:\n\t\tif i[\'user_id\'] not in users:\n\t\t\tusers.append(i[\'user_id\'])\n\t\t\tlast=db(db.rated.user_id==i[\'user_id\']).select(db.rated.Rating)\n\t\t\tl=len(last)\n\t\t\trt=last[l-1][\'Rating\']\n\t\t\tctr += rt\n\t\telse:\n\t\t\tcontinue\n\tctr=ctr*1.0\n\tif len(users)==0:\n\t    ctr=0\n\telse:\n\t    ctr=(ctr/len(users))\n\tdb(db.song.id==int(request.args(1))).update(Rating=ctr)\n\treturn ctr\n\t \n@cache.action()\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request, db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    return service()\n\n\n@auth.requires_signature()\ndef data():\n    """\n    http://..../[app]/default/data/tables\n    http://..../[app]/default/data/create/[table]\n    http://..../[app]/default/data/read/[table]/[id]\n    http://..../[app]/default/data/update/[table]/[id]\n    http://..../[app]/default/data/delete/[table]/[id]\n    http://..../[app]/default/data/select/[table]\n    http://..../[app]/default/data/search/[table]\n    but URLs must be signed, i.e. linked with\n      A(\'table\',_href=URL(\'data/tables\',user_signature=True))\n    or with the signed load operator\n      LOAD(\'default\',\'data.load\',args=\'tables\',ajax=True,user_signature=True)\n    """\n    return dict(form=crud())\n\n@auth.requires_login()\ndef viewProfile():\n\tr=db(db.auth_user.id==auth.user.id).select(db.auth_user.id,db.auth_user.reputation)\n     \tx = db(db.auth_user.id == auth.user.id).select()\n        liked = db((x[0][\'id\'] == db.likes.user_id)&(db.likes.song_id==db.song.id)).select(db.likes.song_id,db.song.ALL)\n        disliked = db((x[0][\'id\'] == db.dislikes.user_id)&(db.dislikes.song_id==db.song.id)).select(db.dislikes.song_id,db.song.ALL)\n        recommended = db((x[0][\'id\'] == db.recommend.recommended_to)&(db.recommend.song_id==db.song.id)&(db.recommend.recommended_by==db.auth_user.id)).select(db.recommend.ALL,db.song.ALL,db.auth_user.ALL)\n\ty = db(x[0][\'id\'] == db.auth_user.id).select(db.auth_user.first_name)\n\ta = db((x[0][\'id\'] == db.playlist.user_id)&(db.playlist.song_id==db.song.id)).select(db.playlist.song_id,db.song.ALL)\n\tb = db(db.song.user_id == x[0][\'id\']).select()\n\treturn locals()\n\ndef homepage():\n    var1=request.post_vars.button1\n    var2=request.post_vars.button2\n    var3=request.post_vars.button3\n    var4=request.post_vars.button4\n    a=auth.user_id\n    fn=auth.user.first_name\n    ln=auth.user.last_name\n    likeform=[]\n    dislikeform=[]\n    commentform=[]\n    rate1=[]\n    rate2=[]\n    rate3=[]\n    rate4=[]\n    rate5=[]\n    likes=[]\n    dislikes=[]\n    if var1 is not None:\n        option=1\n        n=db().select(db.song.ALL,orderby=~db.song.post_time)\n    elif var2 is not None:\n        option=2\n        n=db().select(db.song.ALL,orderby=~db.song.Rating)\n    elif var3 is not None:\n        option=3\n        n=db((db.rated.user_id==auth.user_id) & (db.rated.song_id==db.song.id)).select(db.song.ALL,orderby=~db.rated.Rating)\n    elif var4 is not None:\n        option=4\n        n=db().select(db.song.ALL,orderby=~db.song.Num_views)\n    else:\n        option=1\n        n=db().select(db.song.ALL,orderby=~db.song.post_time)\n    usernames=[]\n    likesongid=request.post_vars.songid\n    dislikesongid=request.post_vars.dsongid\n    for i in range(len(n)):\n        abc=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.username)\n        usernames.append(abc[0][\'username\'])\n        L=db(db.likes.song_id==n[i][\'id\']).select(db.likes.user_id)\n        D=db(db.dislikes.song_id==n[i][\'id\']).select(db.dislikes.user_id)\n        likes.append(n[i][\'Num_likes\'])\n        dislikes.append(n[i][\'Num_dislikes\'])\n        #likeform.append(SQLFORM.factory(submit_button="Like"))\n        #dislikeform.append(SQLFORM.factory(submit_button="Dislike"))\n        rate1.append(SQLFORM.factory(submit_button="1"))\n        rate2.append(SQLFORM.factory(submit_button="2"))\n        rate3.append(SQLFORM.factory(submit_button="3"))\n        rate4.append(SQLFORM.factory(submit_button="4"))\n        rate5.append(SQLFORM.factory(submit_button="5"))\n        commentform.append(SQLFORM.factory(db.Field("cmt","string",label="Add comment:",required=True),\n                                        submit_button="Comment"))\n        flag=0\n       # print \'\\n\\n********\' + request.post_vars.n[i][\'id\'] + \'**************\\n\\n\'\n        if likesongid is not None and int(likesongid)==n[i][\'id\']:\n            lk=db(db.likes.song_id==n[i][\'id\']).select(db.likes.ALL)\n            dlk=db(db.dislikes.song_id==n[i][\'id\']).select(db.dislikes.ALL)\n            for j in range(len(lk)):\n                if lk[j][\'song_id\']==n[i][\'id\'] and lk[j][\'user_id\']==a:\n                    flag=1\n                    likes[i]-=1\n                    db(db.likes.id==lk[j][\'id\']).delete()\n                    db(db.song.id==n[i][\'id\']).update(song_rank=100+(2*likes[i])-dislikes[i])\n\t\t    reputations=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n\t\t    init_rep=reputations[0][\'reputation\']\n\t\t    db(db.auth_user.id==n[i][\'user_id\']).update(reputation=init_rep-20)\n                    x=db(db.song.id==n[i][\'id\']).select(db.song.song_rank)\n                    db(db.song.id==n[i][\'id\']).update(Num_likes=likes[i],Num_dislikes=dislikes[i])\n                    \n            for j in range(len(dlk)):\n                if dlk[j][\'song_id\']==n[i][\'id\'] and dlk[j][\'user_id\']==a:\n                    flag=1\n                    dislikes[i]-=1\n                    likes[i]+=1\n                    db.likes.insert(song_id=n[i][\'id\'],user_id=a)\n                    db(db.dislikes.id==dlk[j][\'id\']).delete()\n                    db(db.song.id==n[i][\'id\']).update(song_rank=100+(2*likes[i])-dislikes[i])\n\t\t    reputations=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n\t\t    init_rep=reputations[0][\'reputation\']\n\t\t    db(db.auth_user.id==n[i][\'user_id\']).update(reputation=init_rep+30)\n\t\t    #db(db.auth_user.id==n[i][\'user_id\']).update(reputation=300)\n                    db(db.song.id==n[i][\'id\']).update(Num_likes=likes[i],Num_dislikes=dislikes[i])\n            if flag==0:\n                db.likes.insert(song_id=n[i][\'id\'],user_id=a)\n                likes[i]+=1\n\t\treputations=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n\t\tinit_rep=reputations[0][\'reputation\']\n\t\tdb(db.auth_user.id==n[i][\'user_id\']).update(reputation=init_rep+20)\n                db(db.song.id==n[i][\'id\']).update(song_rank=100+(2*likes[i])-dislikes[i])\n                db(db.song.id==n[i][\'id\']).update(Num_likes=likes[i],Num_dislikes=dislikes[i])\n        if dislikesongid is not None and int(dislikesongid)==n[i][\'id\']:\n             lk=db(db.likes.song_id==n[i][\'id\']).select(db.likes.ALL)\n             dlk=db(db.dislikes.song_id==n[i][\'id\']).select(db.dislikes.ALL)\n             flag=0\n             for j in range(len(dlk)):\n                 if dlk[j][\'song_id\']==n[i][\'id\'] and dlk[j][\'user_id\']==a:\n                     flag=1\n                     dislikes[i]-=1\n                     db(db.dislikes.id==dlk[j][\'id\']).delete()\n                     db(db.song.id==n[i][\'id\']).update(song_rank=100+(2*likes[i])-dislikes[i])\n                     db(db.song.id==n[i][\'id\']).update(Num_likes=likes[i],Num_dislikes=dislikes[i])\n\t\t     reputations=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n\t\t     init_rep=reputations[0][\'reputation\']\n\t\t     db(db.auth_user.id==n[i][\'user_id\']).update(reputation=init_rep+10)\n                     redirect(URL(r=request,f=\'homepage\'))\n             for j in range(len(lk)):\n                 if lk[j][\'song_id\']==n[i][\'id\'] and lk[j][\'user_id\']==a:\n                     flag=1\n                     dislikes[i]+=1\n                     likes[i]-=1\n                     db(db.likes.id==lk[j][\'id\']).delete()\n                     db.dislikes.insert(user_id=a,song_id=n[i][\'id\'])\n                     db(db.song.id==n[i][\'id\']).update(song_rank=100+(2*likes[i])-dislikes[i])\n                     db(db.song.id==n[i][\'id\']).update(Num_likes=likes[i],Num_dislikes=dislikes[i])\n\t\t     reputations=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n\t\t     init_rep=reputations[0][\'reputation\']\n\t\t     db(db.auth_user.id==n[i][\'user_id\']).update(reputation=init_rep-30)\n                     redirect(URL(r=request,f=\'homepage\'))\n             if flag==0:\n                 dislikes[i]+=1\n                 db.dislikes.insert(user_id=a,song_id=n[i][\'id\'])\n                 db(db.song.id==n[i][\'id\']).update(song_rank=100+(2*likes[i])-dislikes[i])\n\t\t reputations=db(db.auth_user.id==n[i][\'user_id\']).select(db.auth_user.id,db.auth_user.reputation)\n\t\t init_rep=reputations[0][\'reputation\']\n\t\t db(db.auth_user.id==n[i][\'user_id\']).update(reputation=init_rep-10)\n                 db(db.song.id==n[i][\'id\']).update(Num_likes=likes[i],Num_dislikes=dislikes[i])\n                 redirect(URL(r=request,f=\'homepage\'))\n        if(commentform[i].process(formname=\'commentform[%d]\'%i).accepted):\n              db.comment.insert(user_id=a,song_id=n[i][\'id\'],comment_text=commentform.vars.cmt)\n              redirect(URL(r=request,f=\'homepage\'))\n        if(rate1[i].process(formname=\'rate1[%d]\'%i).accepted):\n            rate=db().select(db.rated.ALL)\n            flag=0\n            for j in range(len(rate)):\n                flag=1\n                if rate[j][\'song_id\']==n[i][\'id\'] and rate[j][\'user_id\']==a:\n                    db(db.rated.id==rate[j][\'id\']).update(Rating=1)\n            if flag==0:\n                db.rated.insert(song_id=n[i][\'id\'],user_id=a,Rating=1)\n            redirect(URL(r=request,f=\'homepage\'))\n        if(rate2[i].process(formname=\'rate2[%d]\'%i).accepted):\n            rate=db().select(db.rated.ALL)\n            flag=0\n            for j in range(len(rate)):\n                flag=1\n                if rate[j][\'song_id\']==n[i][\'id\'] and rate[j][\'user_id\']==a:\n                    db(db.rated.id==rate[j][\'id\']).update(Rating=2)\n            if flag==0:\n                db.rated.insert(song_id=n[i][\'id\'],user_id=a,Rating=2)\n            redirect(URL(r=request,f=\'homepage\'))\n        if(rate3[i].process(formname=\'rate3[%d]\'%i).accepted):\n            rate=db().select(db.rated.ALL)\n            flag=0\n            for j in range(len(rate)):\n                flag=1\n                if rate[j][\'song_id\']==n[i][\'id\'] and rate[j][\'user_id\']==a:\n                    db(db.rated.id==rate[j][\'id\']).update(Rating=3)\n            if flag==0:\n                db.rated.insert(song_id=n[i][\'id\'],user_id=a,Rating=3)\n            redirect(URL(r=request,f=\'homepage\'))\n        if(rate4[i].process(formname=\'rate4[%d]\'%i).accepted):\n            rate=db().select(db.rated.ALL)\n            flag=0\n            for j in range(len(rate)):\n                flag=1\n                if rate[j][\'song_id\']==n[i][\'id\'] and rate[j][\'user_id\']==a:\n                    db(db.rated.id==rate[j][\'id\']).update(Rating=4)\n            if flag==0:\n                db.rated.insert(song_id=n[i][\'id\'],user_id=a,Rating=4)\n            redirect(URL(r=request,f=\'homepage\'))\n        if(rate5[i].process(formname=\'rate5[%d]\'%i).accepted):\n            rate=db().select(db.rated.ALL)\n            flag=0\n            for j in range(len(rate)):\n                flag=1\n                if rate[j][\'song_id\']==n[i][\'id\'] and rate[j][\'user_id\']==a:\n                    db(db.rated.id==rate[j][\'id\']).update(Rating=5)\n            if flag==0:\n                db.rated.insert(song_id=n[i][\'id\'],user_id=a,Rating=5)\n            redirect(URL(r=request,f=\'homepage\'))\n        #embed_mp3=XML(\'<embed src="%s" autoplay="false" loop="false" />\' % n[i][\'Audio_File\'])\n        flag=0\n        lk=db().select(db.likes.ALL)\n        dlk=db().select(db.dislikes.ALL)\n        for k in range(len(lk)):\n            if lk[k][\'user_id\']==auth.user_id and lk[k][\'song_id\']==n[i][\'id\']:\n                flag=1\n        if flag==1:\n            likeform.append(1)\n        else:\n            likeform.append(0)\n        flag=0\n        for k in range(len(dlk)):\n            if dlk[k][\'user_id\']==auth.user_id and dlk[k][\'song_id\']==n[i][\'id\']:\n                flag=1\n        if flag==1:\n            dislikeform.append(1)\n        else:\n            dislikeform.append(0)\n        #recordings()\n    if option==1:\n        n=db().select(db.song.ALL,orderby=~db.song.post_time)\n    elif option==2:\n        n=db().select(db.song.ALL,orderby=~db.song.Rating)\n    elif option==3:\n        n=db((db.rated.user_id==auth.user_id) & (db.rated.song_id==db.song.id)).select(db.song.ALL,orderby=~db.rated.Rating)\n    elif option==4:\n        n=db().select(db.song.ALL,orderby=~db.song.Num_views)\n    return locals()\n\ndef upload():\n\tform = SQLFORM(db.song)\n\tform.vars.user_id = auth.user.id\n\tif form.process().accepted:\n\t\tresponse.flash="Success!!"\n\t\tredirect(URL(r=request,f=\'index\'))\n\treturn locals()\n\t\t \n@auth.requires_login()\t\ndef delete_song():\n\ta = request.vars.id1\n\ta = int(a)\n\tif((auth.user.Account_type == \'Admin\') or (auth.user.Account_type == \'Superuser\')):\n\t\tdb(db.song.id == a).delete()\n\t\tdb(db.comments.song_id == a).delete()\n\t\tdb(db.rated.song_id == a).delete()\n\t\tdb(db.likes.song_id == a).delete()\n\t\tdb(db.dislikes.song_id == a).delete()\n\t\tdb(db.recommend.song_id == a).delete()\n\t\tredirect(URL(r=request, f=\'index\'))\n\telse:\n\t\tx = db((db.song.user_id == auth.user.id) & (db.song.id == a)).select()\n\t\tif(len(x) == 0):\n\t\t\tredirect(URL(r=request, f=\'error_delete\'))\n\t\telse:\n\t\t\tdb((db.song.user_id == auth.user.id) & (db.song.id == a)).delete()\n\t\t\tdb(db.comments.song_id == a).delete()\n\t\t\tdb(db.rated.song_id == a).delete()\n\t\t\tdb(db.likes.song_id == a).delete()\n\t\t\tdb(db.dislikes.song_id == a).delete()\n\t\t\tdb(db.recommend.song_id == a).delete()\n\t\t\tredirect(URL(r=request, f=\'index\'))\n\treturn locals()\ndef delete_song1():\n\ta = request.vars.id1\n\ta = int(a)\n\tif((auth.user.Account_type == \'Admin\') or (auth.user.Account_type == \'Superuser\')):\n\t\tdb(db.song.id == a).delete()\n\t\tdb(db.comments.song_id == a).delete()\n\t\tdb(db.rated.song_id == a).delete()\n\t\tdb(db.likes.song_id == a).delete()\n\t\tdb(db.dislikes.song_id == a).delete()\n\t\tdb(db.recommend.song_id == a).delete()\n\t\tredirect(URL(r=request, f=\'view_reported\'))\n\telse:\n\t\tx = db((db.song.user_id == auth.user.id) & (db.song.id == a)).select()\n\t\tif(len(x) == 0):\n\t\t\tredirect(URL(r=request, f=\'error_delete\'))\n\t\telse:\n\t\t\tdb((db.song.user_id == auth.user.id) & (db.song.id == a)).delete()\n\t\t\tdb(db.comments.song_id == a).delete()\n\t\t\tdb(db.rated.song_id == a).delete()\n\t\t\tdb(db.likes.song_id == a).delete()\n\t\t\tdb(db.dislikes.song_id == a).delete()\n\t\t\tdb(db.recommend.song_id == a).delete()\n\t\t\tredirect(URL(r=request, f=\'view_reported\'))\n\treturn locals()\n\ndef error_edit():\n\treturn locals()\nfrom gluon.tools import Crud\ncrud = Crud(db)\n@auth.requires_login()\t\ndef edit_song():\n\ta = int(request.vars.id1)\n\tx = db(db.song.id == a).select(db.song.user_id)\n\tform = crud.update(db.song,a)\n#\tform = SQLFORM.factory(\n#\t\tField(\'Title\', \'string\', required=True),\n#\t\tField(\'raaga\',\'string\'),\n#\t\tField(\'taala\',\'string\'),\n#\t\tField(\'Composer\',\'string\'),\n#\t\tField(\'Genre\',\'string\',requires=IS_IN_SET([\'Art music\',\'Popular music\',\'Traditional music\'])),\n#\t\tField(\'Description\',\'text\'))\n#\tdb(db.song.id == a).update(Title = form.vars.Title)\n#\tdb(db.song.id == a).update(raaga = form.vars.raaga)\n#\tdb(db.song.id == a).update(taala = form.vars.taala)\n#\tdb(db.song.id == a).update(Composer = form.vars.Composer)\n#\tdb(db.song.id == a).update(Genre = form.vars.Genre)\n#\tdb(db.song.id == a).update(Description = form.vars.Description)A\n\treturn locals()\t\t\n\n\n@auth.requires_login()\ndef update_comment():\n\ta = request.vars.id1\n\ta = int(a)\n\tx = db((db.comments.song_id == a) & (db.comments.user_id == auth.user.id)).select(db.comments.id)\n\tform = crud.update(db.comments, x[0][\'id\'])\n\tif form.process().accepted:\n    \t\tredirect(URL(\'songpage?id1=%d\'%(a)))\n\treturn locals()\n\nresponse._vars=response._caller(homepage)\n'
+p7
+sS'snapshot'
+p8
+(dp9
+S'exception'
+p10
+(dp11
+S'__hash__'
+p12
+S"<method-wrapper '__hash__' of exceptions.AttributeError object>"
+p13
+sS'__setattr__'
+p14
+S"<method-wrapper '__setattr__' of exceptions.AttributeError object>"
+p15
+sS'__reduce_ex__'
+p16
+S'<built-in method __reduce_ex__ of exceptions.AttributeError object>'
+p17
+sS'__getslice__'
+p18
+S"<method-wrapper '__getslice__' of exceptions.AttributeError object>"
+p19
+sS'__getitem__'
+p20
+S"<method-wrapper '__getitem__' of exceptions.AttributeError object>"
+p21
+sS'__setstate__'
+p22
+S'<built-in method __setstate__ of exceptions.AttributeError object>'
+p23
+sS'__reduce__'
+p24
+S'<built-in method __reduce__ of exceptions.AttributeError object>'
+p25
+sS'__str__'
+p26
+S"<method-wrapper '__str__' of exceptions.AttributeError object>"
+p27
+sS'__format__'
+p28
+S'<built-in method __format__ of exceptions.AttributeError object>'
+p29
+sS'__getattribute__'
+p30
+S"<method-wrapper '__getattribute__' of exceptions.AttributeError object>"
+p31
+sS'__class__'
+p32
+S"<type 'exceptions.AttributeError'>"
+p33
+sS'__unicode__'
+p34
+S'<built-in method __unicode__ of exceptions.AttributeError object>'
+p35
+sS'__delattr__'
+p36
+S"<method-wrapper '__delattr__' of exceptions.AttributeError object>"
+p37
+sS'__subclasshook__'
+p38
+S'<built-in method __subclasshook__ of type object>'
+p39
+sS'__repr__'
+p40
+S"<method-wrapper '__repr__' of exceptions.AttributeError object>"
+p41
+sS'args'
+p42
+S'("\'NoneType\' object has no attribute \'first_name\'",)'
+p43
+sS'__dict__'
+p44
+S'{}'
+p45
+sS'__sizeof__'
+p46
+S'<built-in method __sizeof__ of exceptions.AttributeError object>'
+p47
+sS'__doc__'
+p48
+S"'Attribute not found.'"
+p49
+sS'__init__'
+p50
+S"<method-wrapper '__init__' of exceptions.AttributeError object>"
+p51
+sS'__new__'
+p52
+S'<built-in method __new__ of type object>'
+p53
+ssS'evalue'
+p54
+S"'NoneType' object has no attribute 'first_name'"
+p55
+sS'request'
+p56
+cgluon.html
+XML_unpickle
+p57
+(S's\xe6T\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">ajax</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">application</td><td style="vertical-align:top;">:</td><td><div>swaraa</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">args</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cid</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">client</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">controller</td><td style="vertical-align:top;">:</td><td><div>default</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cookies</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">session_id_admin</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-7b858860-645a-48bf-b76c-ba06f68425c8<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_swaraa</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">env</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT</td><td style="vertical-align:top;">:</td><td><div>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT_ENCODING</td><td style="vertical-align:top;">:</td><td><div>gzip,deflate,sdch</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT_LANGUAGE</td><td style="vertical-align:top;">:</td><td><div>en-US,en;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ALEXATOOLBAR_ALX_NS_PH</td><td style="vertical-align:top;">:</td><td><div>AlexaToolbar/alxg-3.2</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_CONNECTION</td><td style="vertical-align:top;">:</td><td><div>keep-alive</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_COOKIE</td><td style="vertical-align:top;">:</td><td><div>session_id_admin=127.0.0.1-7b858860-645a-48bf-b76c-ba06f68425c8; session_id_swaraa=127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_HOST</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1:8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_USER_AGENT</td><td style="vertical-align:top;">:</td><td><div>Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.95 Safari/537.36</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">PATH_INFO</td><td style="vertical-align:top;">:</td><td><div>/swaraa/default/homepage</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">QUERY_STRING</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REMOTE_ADDR</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REMOTE_PORT</td><td style="vertical-align:top;">:</td><td><div>43285</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REQUEST_METHOD</td><td style="vertical-align:top;">:</td><td><div>GET</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SCRIPT_NAME</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_NAME</td><td style="vertical-align:top;">:</td><td><div>himangi-Inspiron-N5110</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_PORT</td><td style="vertical-align:top;">:</td><td><div>8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_PROTOCOL</td><td style="vertical-align:top;">:</td><td><div>HTTP/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_SOFTWARE</td><td style="vertical-align:top;">:</td><td><div>Rocket 1.2.6</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">app_folders</td><td style="vertical-align:top;">:</td><td><div>set([&#x27;/home/himangi/INTRO TO DB/web2py/applications/welcome/&#x27;, &#x27;/home/himangi/INTRO TO DB/web2py/applications/swaraa/&#x27;])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">applications_parent</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_args</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_options</td><td style="vertical-align:top;">:</td><td><div>&lt;Values at 0x8e3a50c: {&#x27;verbose&#x27;: False, &#x27;ip&#x27;: &#x27;127.0.0.1&#x27;, &#x27;debuglevel&#x27;: 30, &#x27;with_scheduler&#x27;: False, &#x27;ips&#x27;: [&#x27;127.0.1.1&#x27;], &#x27;shutdown_timeout&#x27;: 5, &#x27;taskbar&#x27;: False, &#x27;with_coverage&#x27;: False, &#x27;port&#x27;: 8000, &#x27;maxthreads&#x27;: None, &#x27;softcron&#x27;: False, &#x27;server_name&#x27;: &#x27;himangi-Inspiron-N5110&#x27;, &#x27;bpython&#x27;: False, &#x27;nogui&#x27;: False, &#x27;pid_filename&#x27;: &#x27;httpserver.pid&#x27;, &#x27;extcron&#x27;: False, &#x27;runcron&#x27;: False, &#x27;run_system_tests&#x27;: False, &#x27;test&#x27;: None, &#x27;folder&#x27;: &#x27;/home/himangi/INTRO TO DB/web2py&#x27;, &#x27;config&#x27;: &#x27;&#x27;, &#x27;import_models&#x27;: False, &#x27;winservice&#x27;: &#x27;&#x27;, &#x27;shell&#x27;: None, &#x27;run&#x27;: &#x27;&#x27;, &#x27;log_filename&#x27;: &#x27;httpserver.log&#x27;, &#x27;profiler_dir&#x27;: None, &#x27;args&#x27;: [&#x27;&#x27;], &#x27;socket_timeout&#x27;: 5, &#x27;ssl_ca_certificate&#x27;: None, &#x27;scheduler&#x27;: None, &#x27;interfaces&#x27;: None, &#x27;ssl_private_key&#x27;: &#x27;&#x27;, &#x27;scheduler_groups&#x27;: None, &#x27;password&#x27;: &#x27;&lt;ask&gt;&#x27;, &#x27;request_queue_size&#x27;: 5, &#x27;ssl_certificate&#x27;: &#x27;&#x27;, &#x27;cronjob&#x27;: False, &#x27;numthreads&#x27;: None, &#x27;quiet&#x27;: False, &#x27;minthreads&#x27;: None, &#x27;timeout&#x27;: 10, &#x27;plain&#x27;: False, &#x27;nobanner&#x27;: False}&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">db_sessions</td><td style="vertical-align:top;">:</td><td><div>set([])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">debugging</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gluon_parent</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept</td><td style="vertical-align:top;">:</td><td><div>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept_encoding</td><td style="vertical-align:top;">:</td><td><div>gzip,deflate,sdch</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept_language</td><td style="vertical-align:top;">:</td><td><div>en-US,en;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_alexatoolbar_alx_ns_ph</td><td style="vertical-align:top;">:</td><td><div>AlexaToolbar/alxg-3.2</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_connection</td><td style="vertical-align:top;">:</td><td><div>keep-alive</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_cookie</td><td style="vertical-align:top;">:</td><td><div>session_id_admin=127.0.0.1-7b858860-645a-48bf-b76c-ba06f68425c8; session_id_swaraa=127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_host</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1:8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_user_agent</td><td style="vertical-align:top;">:</td><td><div>Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.95 Safari/537.36</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_jython</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_pypy</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_source</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">local_hosts</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>::1</div></td></tr><tr><td><div>127.0.1.1</div></td></tr><tr><td><div>himangi-Inspiron-N5110</div></td></tr><tr><td><div>::ffff:127.0.0.1</div></td></tr><tr><td><div>127.0.0.1</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path_info</td><td style="vertical-align:top;">:</td><td><div>/swaraa/default/homepage</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">query_string</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remote_addr</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remote_port</td><td style="vertical-align:top;">:</td><td><div>43285</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_method</td><td style="vertical-align:top;">:</td><td><div>GET</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_uri</td><td style="vertical-align:top;">:</td><td><div>/swaraa/default/homepage</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">script_name</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_name</td><td style="vertical-align:top;">:</td><td><div>himangi-Inspiron-N5110</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_port</td><td style="vertical-align:top;">:</td><td><div>8000</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_protocol</td><td style="vertical-align:top;">:</td><td><div>HTTP/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_software</td><td style="vertical-align:top;">:</td><td><div>Rocket 1.2.6</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_path</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_version</td><td style="vertical-align:top;">:</td><td><div>2.7.4-stable+timestamp.2013.10.14.15.16.29</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.errors</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;&lt;stderr&gt;&#x27;, mode &#x27;w&#x27; at 0xb72800d0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.file_wrapper</td><td style="vertical-align:top;">:</td><td><div>&lt;class wsgiref.util.FileWrapper at 0x8defefc&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.input</td><td style="vertical-align:top;">:</td><td><div>&lt;socket._fileobject object at 0xad84bb6c&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.multiprocess</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.multithread</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.run_once</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.url_scheme</td><td style="vertical-align:top;">:</td><td><div>http</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>1</div></td></tr><tr><td><div>0</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_errors</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;&lt;stderr&gt;&#x27;, mode &#x27;w&#x27; at 0xb72800d0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_file_wrapper</td><td style="vertical-align:top;">:</td><td><div>&lt;class wsgiref.util.FileWrapper at 0x8defefc&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_input</td><td style="vertical-align:top;">:</td><td><div>&lt;socket._fileobject object at 0xad84bb6c&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_multiprocess</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_multithread</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_run_once</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_url_scheme</td><td style="vertical-align:top;">:</td><td><div>http</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>1</div></td></tr><tr><td><div>0</div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">extension</td><td style="vertical-align:top;">:</td><td><div>html</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">folder</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py/applications/swaraa/</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">function</td><td style="vertical-align:top;">:</td><td><div>homepage</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">global_settings</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">app_folders</td><td style="vertical-align:top;">:</td><td><div>set([&#x27;/home/himangi/INTRO TO DB/web2py/applications/welcome/&#x27;, &#x27;/home/himangi/INTRO TO DB/web2py/applications/swaraa/&#x27;])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">applications_parent</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_args</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cmd_options</td><td style="vertical-align:top;">:</td><td><div>&lt;Values at 0x8e3a50c: {&#x27;verbose&#x27;: False, &#x27;ip&#x27;: &#x27;127.0.0.1&#x27;, &#x27;debuglevel&#x27;: 30, &#x27;with_scheduler&#x27;: False, &#x27;ips&#x27;: [&#x27;127.0.1.1&#x27;], &#x27;shutdown_timeout&#x27;: 5, &#x27;taskbar&#x27;: False, &#x27;with_coverage&#x27;: False, &#x27;port&#x27;: 8000, &#x27;maxthreads&#x27;: None, &#x27;softcron&#x27;: False, &#x27;server_name&#x27;: &#x27;himangi-Inspiron-N5110&#x27;, &#x27;bpython&#x27;: False, &#x27;nogui&#x27;: False, &#x27;pid_filename&#x27;: &#x27;httpserver.pid&#x27;, &#x27;extcron&#x27;: False, &#x27;runcron&#x27;: False, &#x27;run_system_tests&#x27;: False, &#x27;test&#x27;: None, &#x27;folder&#x27;: &#x27;/home/himangi/INTRO TO DB/web2py&#x27;, &#x27;config&#x27;: &#x27;&#x27;, &#x27;import_models&#x27;: False, &#x27;winservice&#x27;: &#x27;&#x27;, &#x27;shell&#x27;: None, &#x27;run&#x27;: &#x27;&#x27;, &#x27;log_filename&#x27;: &#x27;httpserver.log&#x27;, &#x27;profiler_dir&#x27;: None, &#x27;args&#x27;: [&#x27;&#x27;], &#x27;socket_timeout&#x27;: 5, &#x27;ssl_ca_certificate&#x27;: None, &#x27;scheduler&#x27;: None, &#x27;interfaces&#x27;: None, &#x27;ssl_private_key&#x27;: &#x27;&#x27;, &#x27;scheduler_groups&#x27;: None, &#x27;password&#x27;: &#x27;&lt;ask&gt;&#x27;, &#x27;request_queue_size&#x27;: 5, &#x27;ssl_certificate&#x27;: &#x27;&#x27;, &#x27;cronjob&#x27;: False, &#x27;numthreads&#x27;: None, &#x27;quiet&#x27;: False, &#x27;minthreads&#x27;: None, &#x27;timeout&#x27;: 10, &#x27;plain&#x27;: False, &#x27;nobanner&#x27;: False}&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">db_sessions</td><td style="vertical-align:top;">:</td><td><div>set([])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">debugging</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gluon_parent</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_jython</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_pypy</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_source</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">local_hosts</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>::1</div></td></tr><tr><td><div>127.0.1.1</div></td></tr><tr><td><div>himangi-Inspiron-N5110</div></td></tr><tr><td><div>::ffff:127.0.0.1</div></td></tr><tr><td><div>127.0.0.1</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_version</td><td style="vertical-align:top;">:</td><td><div>2.7.4-stable+timestamp.2013.10.14.15.16.29</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_https</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_local</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_restful</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">now</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2013, 11, 20, 16, 37, 4, 695212)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">raw_args</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">raw_extension</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">url</td><td style="vertical-align:top;">:</td><td><div>/swaraa/default/homepage</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">utcnow</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2013, 11, 20, 11, 7, 4, 695250)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">uuid</td><td style="vertical-align:top;">:</td><td><div>swaraa/127.0.0.1.2013-11-20.16-37-04.f769dbe3-a66d-440d-9396-26ee77e75d51</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi</td><td style="vertical-align:top;">:</td><td><div>&lt;gluon.main.LazyWSGI object at 0xad87520c&gt;</div></td></tr></table></div>'
+tRp58
+sS'frames'
+p59
+(lp60
+(dp61
+S'file'
+p62
+S'/home/himangi/INTRO TO DB/web2py/gluon/restricted.py'
+p63
+sS'dump'
+p64
+(dp65
+S'environment'
+p66
+S"{'A': <class 'gluon.html.A'>, 'ANY_OF': <class 'gluon.validators.ANY_OF'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'BUTTON': <class 'gluon.html.BUTTON'>, 'CAT': <class 'gluon.html.CAT'>, 'CENTER': <class 'gluon.html.CENTER'>, ...}"
+p67
+sS'ccode'
+p68
+S'<code object <module> at 0xb26a3530, file "/home...ications/swaraa/controllers/default.py", line 13>'
+p69
+ssS'lnum'
+p70
+I217
+sS'lines'
+p71
+(dp72
+I212
+S'    try:'
+p73
+sI213
+S'        if isinstance(code, types.CodeType):'
+p74
+sI214
+S'            ccode = code'
+p75
+sI215
+S'        else:'
+p76
+sI216
+S'            ccode = compile2(code, layer)'
+p77
+sI217
+S'        exec ccode in environment'
+p78
+sI218
+S'    except HTTP:'
+p79
+sI219
+S'        raise'
+p80
+sI220
+S'    except RestrictedError:'
+p81
+sI221
+S'        # do not encapsulate (obfuscate) the original RestrictedError'
+p82
+ssS'call'
+p83
+S"(code='# -*- coding: utf-8 -*-\\n# this file is released ...als()\\n\\nresponse._vars=response._caller(homepage)\\n', environment={'A': <class 'gluon.html.A'>, 'ANY_OF': <class 'gluon.validators.ANY_OF'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'BUTTON': <class 'gluon.html.BUTTON'>, 'CAT': <class 'gluon.html.CAT'>, 'CENTER': <class 'gluon.html.CENTER'>, ...}, layer='/home/himangi/INTRO TO DB/web2py/applications/swaraa/controllers/default.py')"
+p84
+sS'func'
+p85
+S'restricted'
+p86
+sa(dp87
+g62
+S'/home/himangi/INTRO TO DB/web2py/applications/swaraa/controllers/default.py'
+p88
+sg64
+(dp89
+sg70
+I752
+sg71
+(dp90
+I741
+S''
+sI742
+S'@auth.requires_login()'
+p91
+sI743
+S'def update_comment():'
+p92
+sI744
+S'\ta = request.vars.id1'
+p93
+sI745
+S'\ta = int(a)'
+p94
+sI746
+S'\tx = db((db.comments.song_id == a) & (db.comments.user_id == auth.user.id)).select(db.comments.id)'
+p95
+sI747
+S"\tform = crud.update(db.comments, x[0]['id'])"
+p96
+sI748
+S'\tif form.process().accepted:'
+p97
+sI749
+S"    \t\tredirect(URL('songpage?id1=%d'%(a)))"
+p98
+sI750
+S'\treturn locals()'
+p99
+ssg83
+S'()'
+p100
+sg85
+S'<module>'
+p101
+sa(dp102
+g62
+S'/home/himangi/INTRO TO DB/web2py/gluon/globals.py'
+p103
+sg64
+(dp104
+S'self'
+p105
+S'undefined'
+p106
+sS'f'
+S'<function homepage>'
+p107
+ssg70
+I372
+sg71
+(dp108
+I367
+S'        self.menu = []             # used by the default view layout'
+p109
+sI368
+S'        self.files = []            # used by web2py_ajax.html'
+p110
+sI369
+S'        self.generic_patterns = []  # patterns to allow generic views'
+p111
+sI370
+S"        self.delimiters = ('{{', '}}')"
+p112
+sI371
+S'        self._vars = None'
+p113
+sI372
+S'        self._caller = lambda f: f()'
+p114
+sI373
+S'        self._view_environment = None'
+p115
+sI374
+S'        self._custom_commit = None'
+p116
+sI375
+S'        self._custom_rollback = None'
+p117
+sI376
+S''
+ssg83
+S'(f=<function homepage>)'
+p118
+sg85
+S'<lambda>'
+p119
+sa(dp120
+g62
+S'/home/himangi/INTRO TO DB/web2py/applications/swaraa/controllers/default.py'
+p121
+sg64
+(dp122
+S'auth.user'
+p123
+S'None'
+p124
+sS'auth.user.first_name'
+p125
+g106
+sS'global auth'
+p126
+S'<gluon.tools.Auth object>'
+p127
+sS'fn'
+p128
+g106
+ssg70
+I455
+sg71
+(dp129
+I450
+S'    var1=request.post_vars.button1'
+p130
+sI451
+S'    var2=request.post_vars.button2'
+p131
+sI452
+S'    var3=request.post_vars.button3'
+p132
+sI453
+S'    var4=request.post_vars.button4'
+p133
+sI454
+S'    a=auth.user_id'
+p134
+sI455
+S'    fn=auth.user.first_name'
+p135
+sI456
+S'    ln=auth.user.last_name'
+p136
+sI457
+S'    likeform=[]'
+p137
+sI458
+S'    dislikeform=[]'
+p138
+sI459
+S'    commentform=[]'
+p139
+ssg83
+S'()'
+p140
+sg85
+S'homepage'
+p141
+sasS'pyver'
+p142
+S'Python 2.7.3: /usr/bin/python (prefix: /usr)'
+p143
+sS'session'
+p144
+g57
+(S's\x9c\x00\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">flash</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr></table></div>'
+tRp145
+sS'etype'
+p146
+S"<type 'exceptions.AttributeError'>"
+p147
+sS'date'
+p148
+S'Wed Nov 20 16:37:05 2013'
+p149
+sS'response'
+p150
+g57
+(S's`\x1d\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">body</td><td style="vertical-align:top;">:</td><td><div>&lt;cStringIO.StringO object at 0xad86ff40&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cookies</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">session_id_swaraa</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div>/</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">delimiters</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>{{</div></td></tr><tr><td><div>}}</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">files</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">flash</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">generic_patterns</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>*</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">google_analytics_id</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">headers</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">X-Powered-By</td><td style="vertical-align:top;">:</td><td><div>web2py</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">logo</td><td style="vertical-align:top;">:</td><td><div><a class="brand" data-w2p_disable_with="default" href="/swaraa/default/index"><b>Swaraa</b>&trade;&nbsp;</a></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">menu</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div><table><tr><td><div>Home</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/swaraa/default/index</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr><tr><td><div><table><tr><td><div>Profile</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/swaraa/default/viewProfile</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">meta</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">author</td><td style="vertical-align:top;">:</td><td><div>Your Name &lt;you@example.com&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">description</td><td style="vertical-align:top;">:</td><td><div>a cool new app</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">generator</td><td style="vertical-align:top;">:</td><td><div>Web2py Web Framework</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">keywords</td><td style="vertical-align:top;">:</td><td><div>web2py, python, framework</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">models_to_run</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>^\\w+\\.py$</div></td></tr><tr><td><div>^default/\\w+\\.py$</div></td></tr><tr><td><div>^default/homepage/\\w+\\.py$</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">postprocessing</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_client</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_compression_level</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_expires</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_key</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_data_name</td><td style="vertical-align:top;">:</td><td><div>session_data_swaraa</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_file</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;/home/himangi/INTRO TO DB/web2py/applications/swaraa/sessions/127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81&#x27;, mode &#x27;rb+&#x27; at 0xad841ee8&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_filename</td><td style="vertical-align:top;">:</td><td><div>/home/himangi/INTRO TO DB/web2py/applications/swaraa/sessions/127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_hash</td><td style="vertical-align:top;">:</td><td><div>68391ea6eb6c4d2ecc5e39faf4e8c34a</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1-dac2a5fe-74ce-408d-9f77-e63f1b7d4c81</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_name</td><td style="vertical-align:top;">:</td><td><div>session_id_swaraa</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_locked</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_masterapp</td><td style="vertical-align:top;">:</td><td><div>swaraa</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_new</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_storage_type</td><td style="vertical-align:top;">:</td><td><div>file</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">status</td><td style="vertical-align:top;">:</td><td><div>200</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">subtitle</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">title</td><td style="vertical-align:top;">:</td><td><div>Swaraa</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">view</td><td style="vertical-align:top;">:</td><td><div>default/homepage.html</div></td></tr></table></div>'
+tRp151
+sS'locals'
+p152
+(dp153
+S'a'
+S'None'
+p154
+sS'var4'
+p155
+S'None'
+p156
+sS'var1'
+p157
+S'None'
+p158
+sS'var3'
+p159
+S'None'
+p160
+sS'var2'
+p161
+S'None'
+p162
+sssS'traceback'
+p163
+S'Traceback (most recent call last):\n  File "/home/himangi/INTRO TO DB/web2py/gluon/restricted.py", line 217, in restricted\n    exec ccode in environment\n  File "/home/himangi/INTRO TO DB/web2py/applications/swaraa/controllers/default.py", line 752, in <module>\n  File "/home/himangi/INTRO TO DB/web2py/gluon/globals.py", line 372, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/himangi/INTRO TO DB/web2py/applications/swaraa/controllers/default.py", line 455, in homepage\n    fn=auth.user.first_name\nAttributeError: \'NoneType\' object has no attribute \'first_name\'\n'
+p164
+s.

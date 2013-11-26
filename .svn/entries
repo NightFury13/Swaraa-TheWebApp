@@ -1,0 +1,154 @@
+10
+
+dir
+0
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1/Source/web2py/applications/swaraa
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+971612ee-3396-4e2b-b597-8829551d6408
+
+cron
+dir
+
+
+
+add
+
+routes.example.py
+file
+
+
+
+add
+
+cache
+dir
+
+
+
+add
+
+controllers
+dir
+
+
+
+add
+
+sessions
+dir
+
+
+
+add
+
+languages
+dir
+
+
+
+add
+
+uploads
+dir
+
+
+
+add
+
+modules
+dir
+
+
+
+add
+
+private
+dir
+
+
+
+add
+
+ABOUT
+file
+
+
+
+add
+
+errors
+dir
+
+
+
+add
+
+LICENSE
+file
+
+
+
+add
+
+models
+dir
+
+
+
+add
+
+progress.log
+file
+
+
+
+add
+
+__init__.py
+file
+
+
+
+add
+
+databases
+dir
+
+
+
+add
+
+static
+dir
+
+
+
+add
+
+views
+dir
+
+
+
+add
+

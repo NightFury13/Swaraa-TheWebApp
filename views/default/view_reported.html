@@ -1,0 +1,21 @@
+{{extend 'layout.html'}}
+<div style="float:left; width=30%;background-color:">
+    <p style='text-align:justified;font-family:Monotype Corsiva;font-size:15px'>
+    Reported songs:
+    <table>
+	{{ for i in son :}}
+	<tr>
+	    <td><a href="songpage?id1={{=i['song.id']}}">	{{=i['song.Title']}}</a> reported by <a href="view_others_Profile?id1={{=i['report_song.user_id']}}">{{=i['auth_user.username']}}</a></li>
+	    </td>
+	    <td>
+		<a href="report_song_undo1?id1={{=i['song.id']}}"><input type="button" value="Remove Report" /></a>
+	    </td>
+	    <td>
+		<a href="delete_song1?id1={{=i['song.id']}}"><input type="button" value="Delete song" /></a>
+	    </td>
+	</tr>
+	{{pass}}
+</table>
+
+    </p>
+</div>

@@ -1,0 +1,193 @@
+{{extend 'layout.html'}}
+
+<div id="searchbox" style="background-color:; width:100%">
+    <h5>Looking for something else?</h5>
+    <form method='get' action="{{=URL('swaraa','default','search')}}">
+	<input type='text' name='keyword'>
+	</br>
+	<input type='submit' value='Search'>
+    </form>
+</div>
+
+<div id='container' style="background-color:; width:60%">
+   <h3> {{=song[0]['Title']}}</h3>
+
+    <!--music player here-->
+    <audio controls autoplay> <source src="{{=URL('download',args=song[0].Audio_File)}}">No support</audio><br></br>				
+</div>
+	<div style="background-color:grey">
+    Raaga: {{=song[0]['raaga']}}<br>
+    Taala: {{=song[0]['taala']}}<br>
+    Composer: {{=song[0]['Composer']}}<br>
+    Genre: {{=song[0]['Genre']}}<br>
+	</div>
+
+
+<div id='footer' style="float:left; width:50%">
+<div style="background-color:">    
+<table>
+	<tr>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="songid" value="{{=song[0]['id']}}"/>
+		    {{if int(likeform)==0:}}
+		    <button type="submit" name="like"><i class="icon-thumbs-up"></i></button>{{=song[0]['Num_likes']}}
+		    {{else:}}
+		    <button type="submit" class="btn btn-success" name="like"><i class="icon-thumbs-up"></i></button>{{=song[0]['Num_likes']}}
+		    {{pass}}
+	    </form></td>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="dsongid" value="{{=song[0]['id']}}"/>
+		    {{if int(dislikeform)==0:}}
+		    <button type="submit" name="dislike"><i class="icon-thumbs-down"></i></button>{{=song[0]['Num_dislikes']}}
+		    {{else:}}
+		    <button type="submit" class="btn btn-success" name="dislike"><i class="icon-thumbs-down"></i></button>{{=song[0]['Num_dislikes']}}
+		    {{pass}}
+	    </form></td>
+	    <td></td>
+	    <td></td>
+	    <td>My rating:</td>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="r1" value="{{=song[0]['id']}}"/>
+		    {{if rate1var==0:}}
+		    <button type="submit" name="rate1"><i class="icon-star"></i>
+		    </button>
+		    {{else:}}
+		    <button type="submit" name="rate1" class="btn btn-warning"><i class="icon-star"></i>
+		    </button>
+		    {{pass}}
+	    </form></td>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="r2" value="{{=song[0]['id']}}"/>
+		    {{if rate2var==0:}}
+		    <button type="submit" name="rate2"><i class="icon-star"></i>
+		    </button>
+		    {{else:}}
+		    <button type="submit" name="rate2" class="btn btn-warning"><i class="icon-star"></i>
+		    </button>
+		    {{pass}}
+	    </form></td>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="r3" value="{{=song[0]['id']}}"/>
+		    {{if rate3var==0:}}
+		    <button type="submit" name="rate3"><i class="icon-star"></i>
+		    </button>
+		    {{else:}}
+		    <button type="submit" name="rate3" class="btn btn-warning"><i class="icon-star"></i>
+		    </button>
+		    {{pass}}
+	    </form></td>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="r4" value="{{=song[0]['id']}}"/>
+		    {{if rate4var==0:}}
+		    <button type="submit" name="rate4"><i class="icon-star"></i>
+		    </button>
+		    {{else:}}
+		    <button type="submit" name="rate4" class="btn btn-warning"><i class="icon-star"></i>
+		    </button>
+		    {{pass}}
+	    </form></td>
+	    <td><form action="songpage.html?id1={{=song[0]['id']}}" method="POST">
+		    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		    <input type="hidden" name="r5" value="{{=song[0]['id']}}"/>
+		    {{if rate5var==0:}}
+		    <button type="submit" name="rate5"><i class="icon-star"></i>
+		    </button>
+		    {{else:}}
+		    <button type="submit" name="rate5" class="btn btn-warning"><i class="icon-star"></i>
+		    </button>
+		    {{pass}}
+	    </form></td>
+	</table>
+	</div>
+
+	<b><div style="background-color:">
+    About the song: {{=song[0]['Description']}}<br>
+	</b></div>
+	</br></br>
+<div style="background-color:">
+		{{if status == 1:}}
+      		<a style="background-color:black"href="delete_song?id1={{=x1}}"><input type="button" value="DELETE SONG"></a>
+	      {{elif status == 2:}}
+	          <a style="background-color:black"href="delete_song?id1={{=x1}}"><input type="button" value="DELETE SONG"></a>
+                  <a href="edit_song?id1={{=x1}}"><input type="button" value="EDIT SONG"></a>
+	      {{else:}}
+	          {{if(stat1 == 1):}}
+	              <a style="background-color:black" href="delete_song?id1={{=x1}}"><input type="button" value="DELETE SONG"></a>
+	      <a href="edit_song?id1={{=x1}}"><input type="button" value="EDIT SONG"></a>
+	          {{pass}}
+	    {{pass}}
+</div>
+<div style='text-align:center; background-color:grey'><b>Current Rating : {{=ctr}}</b><br>
+<div style="float:left">	
+    <a href="recommend?id1={{=yy}}"><input type="button" value="RECOMMEND"></a>   &nbsp; &nbsp; &nbsp; &nbsp; 
+	<div style='text-align:center; background-color:'><b><p style="text-align:center;background-color:black">Current Rating : {{=ctr}}</p></b><br>
+
+{{if in_playlist==0:}}
+<div style="float:left">
+	<a style="background-color:black" href="add_to_playlist?id1={{=yy}}"><input type="button" value="ADD TO PLAYLIST" /></a></div>
+	{{else:}}
+	
+	<a style="background-color:black" href="remove_from_playlist?id1={{=yy}}"><input type="button" value="REMOVE FROM PLAYLIST"></a>
+	{{pass}}	
+	{{if already_reported==0:}}
+	<div style="float:right">
+	<a style="background-color:black" href="report_song?id1={{=yy}}"><input type="button" value="REPORT SONG"></a></div>
+	{{else:}}
+	You have Reported the song. Action will be taken soon if song found inappropriate. Do you want to <a href="report_song_undo?id1={{=yy}}">Undo Report?</a>
+	{{pass}}</br></br>
+<div style="float:right;">    
+	<a href="#comm"><div style='text-align:right; background-color:black'><b>Comment</b></div></a>
+	    </div>
+	<br>
+
+
+	</div>
+	{{count=0}}
+	<h4 style="background-color:peru">Comments :</h4>
+	<ul>
+	    {{for i in comments:}}
+	    <li style='background-color:; float:center'>
+	<p style="color:black">{{=TAG.img(_width=60, _src=URL(r=request, c='default', f='download', args=userpic[count]))}}	    
+	<b>By {{=COMMENT_USERS[count]['username']}}
+
+	             : @ {{=i['comment_time']}}</b></p>
+		<pre>{{=i['comment_text']}}</pre>
+{{if (status == 1):}}<b>
+         <div style='float:right'>
+        <a href="update_comment?id1={{=x1}}" style='background-color:black;text-align:right'>Update</a>
+         </div>
+         {{elif (status == 2):}}
+         <div style='float:right'>
+         <a href="update_comment?id1={{=x1}}" style='background-color:black;text-align:right'>Update</a>
+         </div>
+         {{else:}}
+             {{if(stat[count] == 1):}}
+             <div style='float:right'>
+         	<a href="update_comment?id1={{=x1}}" style='background-color:black;text-align:right'>Update</a>
+             </div></b>
+             {{pass}}
+         {{pass}}
+             {{count+=1}}
+
+	    {{if i['reported']==0 :}}
+	    <a href="report_comment?id1={{=yy}}&id2={{=i['id']}}" style="background-color:black">REPORT</a>
+	    {{else:}}
+	    You have Reported the comment. Action will be taken soon if comment found inappropriate. Do you want to <a href="report_comment_undo?id1={{=yy}}&id2={{=i['id']}}">Undo Report?</a>
+	    {{pass}}
+	    </li>
+		<br/><br/>
+	    {{pass}}
+	</ul>
+	<br>
+	<div id='comment form' style='background-color:'>
+	    <a id='comm'><h4 style="background-color:">Post a Comment </h4></a>
+	    {{=commform}}
+	</div>
+
+    </div>

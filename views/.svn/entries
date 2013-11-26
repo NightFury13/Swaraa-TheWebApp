@@ -1,0 +1,161 @@
+10
+
+dir
+0
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1/Source/web2py/applications/swaraa/views
+svn+ssh://team15@ssad.virtual-labs.ac.in/home/team15/repo1
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+971612ee-3396-4e2b-b597-8829551d6408
+
+__init__.py
+file
+
+
+
+add
+
+generic.map
+file
+
+
+
+add
+
+generic.ics
+file
+
+
+
+add
+
+images.jpeg
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+generic.load
+file
+
+
+
+add
+
+appadmin.html
+file
+
+
+
+add
+
+Profile_layout.html
+file
+
+
+
+add
+
+generic.jsonp
+file
+
+
+
+add
+
+generic.xml
+file
+
+
+
+add
+
+web2py_ajax.html
+file
+
+
+
+add
+
+back.jpg
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+generic.html
+file
+
+
+
+add
+
+layout.html
+file
+
+
+
+add
+
+generic.rss
+file
+
+
+
+add
+
+generic.json
+file
+
+
+
+add
+
+default
+dir
+
+
+
+add
+
+generic.pdf
+file
+
+
+
+add
+

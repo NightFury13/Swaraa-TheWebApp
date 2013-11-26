@@ -1,0 +1,116 @@
+{{extend 'layout.html'}}
+{{if auth.user_id:}}	
+<div id="searchbox" style="float:left;background-color;;width:50%">
+<h3>Search :</h3>
+<form method='get' action="{{=URL('swaraa','default','search')}}">
+    <input type='text' name='keyword'><br/>
+<input type='submit' value='Search'>
+</form>
+{{if auth.username=='admin' :}}
+<a href="view_reported"> <input type="button" value="View reported" /></a>
+{{pass}} 
+</div>
+
+
+<div style="float:right;width:40%; background-color:">
+    <center><h3 style="background-color:">Upload what's New!</h3></center>
+    <center>
+	<form action="upload.html" method="POST">
+        <input type="submit" value="Upload"/>
+        </form>
+		<h4 style="background-color:">Or view your Favourites!</h4>
+	{{=A(T("View Profile"), _href=URL('swaraa','default','viewProfile'), _class='btn', _style='margin-top: 1em;')}}
+    </center>
+</div>
+{{pass}}
+
+
+<br><br>
+<br><br><br><br>
+<br><br><br><br>
+<hr width=100%>
+<div style="background-color:;width:40%"><h3>Sort By:</h3>
+<table style="background-color:" border="0">
+    <tr>
+	<td>
+	    <form action="homepage.html" method="POST">
+        {{if option==1:}}
+            <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+            <input type="submit" class="btn btn-primary"  name="button1" value="Most recent"/>
+        {{else:}}
+            <input type="submit" name="button1" value="Most recent"/>
+            {{pass}}
+	    </form>
+	</td>
+	<td>
+	    <form action="homepage.html" method="POST">
+        {{if option==2:}}
+            <input type="submit" class="btn btn-primary" name="button2" value="Top rated"/>
+        {{else:}}
+            <input type="submit" name="button2" value="Top rated"/>
+            {{pass}}
+	    </form>
+	</td>
+	<td>
+	    <form action="homepage.html" method="POST">
+        {{if option==3:}}
+            <input type="submit" class="btn btn-primary" name="button3" value="My top rated"/>
+        {{else:}}
+            <input type="submit" name="button3" value="My top rated"/>
+            {{pass}}
+	    </form>
+	</td>
+	<td>
+        <form action="homepage.html" method="POST">
+        {{if option==4:}}
+            <input type="submit" class="btn btn-primary" name="button4" value="Most viewed"/>
+        {{else:}}
+            <input type="submit" name="button4" value="Most viewed"/>
+            {{pass}}
+	    </form>
+	</td>
+    </tr>
+</table>
+</div>
+<ol>
+    {{for i in range(len(n)):}}
+	<hr width=100%>
+	<div style=" width:50%; background-color:">
+    	<li><h4><a href="songpage?id1={{=n[i]['id']}}">{{=n[i]['Title']}}</a></h4><br/>
+    	Uploaded by: {{=usernames[i]}} at {{=n[i]['post_time']}}<br/>
+            <audio controls>
+			<source src="{{=URL('download',args=n[i]['Audio_File'])}}">No support</audio><br>
+    	<table>
+		<tr>
+		    <td><form action="homepage.html" method="POST">
+		    	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+                <input type="hidden" name="songid" value="{{=n[i]['id']}}"/>
+                {{if int(likeform[i])==0:}}
+                    <button type="submit" name="like"><i class="icon-thumbs-up"></i></button>
+                {{else:}}
+                <button type="submit" class="btn btn-success" name="like"><i class="icon-thumbs-up"></i></button>
+                {{pass}}
+                </form>
+				</td>
+            <td><form action="homepage.html" method="POST">
+                <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+                <input type="hidden" name="dsongid" value="{{=n[i]['id']}}"/>
+                {{if int(dislikeform[i])==0:}}
+                    <button type="submit" name="dislike"><i class="icon-thumbs-down"></i></button>
+                {{else:}}
+                <button type="submit" class="btn btn-success" name="dislike"><i class="icon-thumbs-down"></i></button>
+                {{pass}}
+                </form>
+				</td>
+		</tr>
+		<tr>
+		    <th>Average rating:{{=n[i]['Rating']}}</th>
+			<td>{{=n[i]['Num_views']}} views</td>
+		    <td>{{=n[i]['Num_likes']}} likes</td>
+		    <td>{{=n[i]['Num_dislikes']}} dislikes</td>
+		</tr>
+	    </table>
+	    </li>
+	</div>
+	    {{pass}}
+</ol>

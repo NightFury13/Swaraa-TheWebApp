@@ -1,0 +1,28 @@
+{{extend 'layout.html'}}
+
+<div id="searchbox" style="background-color:;width:100%">
+<h4>Search :</h4>
+<form method='get' action="{{=URL('swaraa','default','search')}}">
+<input type='text' name='keyword'></br>
+<input type='submit' value='Search'>
+</form>
+</div>
+</br>
+<div id="searchresult">
+<table name='searchresult' border='4'>	
+	<tr style='background-color:peru'>
+		<th style="color:black">Song Name</th>
+		<th style="color:black">Raaga</th>
+		<th style="color:black">Composer</th>
+		<th style="color:black">Rating</th>
+	</tr>
+	{{for i in result:}}
+	<tr style='background-color:'>
+	    <td><a style=""href="songpage?id1={{=i['id']}}"><u>{{=i['Title']}}</u></a></td>
+		<td>{{=i['raaga']}}</td>
+		<td>{{=i['Composer']}}</td>
+		<td>{{=i['Rating']}}</td>
+	</tr>
+	{{pass}}
+</table>
+</div>	
